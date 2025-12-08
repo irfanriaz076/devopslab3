@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  malware-detector:
+    image: ${DOCKER_IMAGE:-cyber-def25/malware-detector:latest}
+    container_name: malware-detection-container
+    volumes:
+      # Mount host folder ./network_logs/ to /input/logs inside container
+      - ./network_logs:/input/logs:ro
+      # Mount output folder to retrieve detection results
+      - ./output:/output:rw
+    environment:
+      - LOG_LEVEL=INFO
+      - DETECTION_THRESHOLD=0.85
+    restart: "no"
+    # Resource limits for production deployment
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
