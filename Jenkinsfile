@@ -2,9 +2,7 @@ pipeline {
     agent any
     
     environment {
-        // Docker Hub credentials
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
-        // FIXED: Use YOUR Docker Hub username
         DOCKER_IMAGE_NAME = 'irfanriaz076/malware-detector'
         DOCKER_IMAGE_TAG = "${BUILD_NUMBER}"
         DOCKER_IMAGE_LATEST = "${DOCKER_IMAGE_NAME}:latest"
@@ -21,7 +19,7 @@ pipeline {
         
         stage('Prepare Environment') {
             steps {
-                echo 'Preparing build environment...'
+                echo 'Preparing build environment.. .'
                 sh '''
                     mkdir -p network_logs output
                     docker --version
@@ -45,7 +43,7 @@ pipeline {
                 echo 'Running container tests...'
                 sh '''
                     docker run --rm ${DOCKER_IMAGE_BUILD} python -c "import pickle; print('Model loading test passed')"
-                    docker run --rm ${DOCKER_IMAGE_BUILD} python -m py_compile inference. py
+                    docker run --rm ${DOCKER_IMAGE_BUILD} python -m py_compile inference.py
                 '''
             }
         }
@@ -74,7 +72,7 @@ pipeline {
                     
                     if [ -f "./output/alerts.csv" ]; then
                         echo "Detection results generated successfully!"
-                        cat ./output/alerts. csv
+                        cat ./output/alerts.csv
                     else
                         echo "Waiting for detection to complete..."
                     fi
