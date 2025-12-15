@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: malware-detector-deployment
+  labels:
+    app: malware-detector
+    tier: backend
+    environment: production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: malware-detector
+  template:
+    metadata:
+      labels:
+        app: malware-detector
+        tier: backend
+    spec:
+      containers:
+      - name: malware-detector
+        image: irfanriaz076/malware-detector:latest
+        imagePullPolicy: Always
+        env:
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: DETECTION_THRESHOLD
+          value: "0.85"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: input-logs
+          mountPath: /input/logs
+          readOnly: true
+        - name: output-alerts
+          mountPath: /output
+        livenessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import pickle; pickle.load(open('/app/model.pkl', 'rb'))"
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        readinessProbe:
+          exec:
+            command:
+            - ls
+            - /app/model.pkl
+          initialDelaySeconds: 10
+          periodSeconds: 30
+      volumes:
+      - name: input-logs
+        persistentVolumeClaim:
+          claimName: malware-detector-input-pvc
+      - name: output-alerts
+        persistentVolumeClaim:
+          claimName: malware-detector-output-pvc
+      restartPolicy: Always
